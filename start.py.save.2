@@ -1,0 +1,165 @@
+#!/usr/bin/python
+
+# This program will query the user for the project description
+# Filter the vowes, store them online db and exits (for now)
+import argparse
+import sys
+import os
+import npyscreen
+import pymssql
+
+
+from argp import *
+from debugFnct import *
+from dbConn import *
+
+# For now we don't have any 
+# cli input at init
+parser=createParser()
+parseAction(parser)
+
+def QueryUser(strText):
+	print(strText)
+	strDescr=input("Input:>_")
+	return strDescr
+
+def storeW(strWord):
+	if boWordKnown:
+		print("Word already in db")
+	else:
+		strQ="insert into Nouns(word)values(" + strWord + ")"
+		ExecuteQuery(strQ)
+		print(strWord + " stored.")
+
+
+
+def storeNoun(strWord):
+	print("Storing: " + strWord)
+	strHost="mysql8.mijnhostingpartner.nl"
+	strUser="Autar3Joomla"
+	strPwd="ijQ84mTO"
+	strDb="autar3newj"
+
+	print("Connect to local db:")
+	store(strWord)
+	#testConn(strHost,strUser,strPwd,strDb)
+
+
+def newproject():
+	# we start with asking the user for the description
+	strDescr=input("Please give a complete description of the project:\n_>")
+	debugprint("Input: " + strDescr)
+
+	#we store the project for later usage
+	strQ="insert into projects(project)values('" + strDescr + "')"
+	ExecuteQuery(strQ)
+
+	# we chop all the words in description in split
+	for word in strDescr.split(" "):
+		# loop through them
+		print("Evaluating: " + word)
+		strNoun=input("Is '" + word +  "' a noun? (y/N)\n_>")
+
+		# if the word is noun 
+		if strNoun.lower() == "y":
+		#	store db
+			debugprint("Storing Noun")
+			storeW(word.lower())
+	# continue loop
+
+def listTable(strTable):
+	strQ="Select * from " + strTable
+	cur=ReturnCursor(strQ)
+	print("\n\n")
+	print("Listing " + strTable + ":")
+	for row in cur:
+		print(str(row[0])+ " : " + str(row[1]))
+	cur.close()
+	strSel=selection("Main")
+
+
+def openproject(strProjectNr):
+	print("opening project")
+	strSel=selection("OpenProject")
+
+
+def selection(strSection):
+
+	strDescr=""
+	print("")
+	print("Main screen:M")
+	print("Exit:E")
+	print("===========================")
+	strDescr=input("Input:>_")
+
+	if strSection=="Main":
+		debugprint("Entering Main")
+		if strDescr.lower()=="1":
+			listTable("Innovations")
+			iProject=QueryUser("Enter Project")
+		if strDescr.lower()=="2":
+			listTable("verb")
+		if strDescr.lower()=="3":
+			listTable("Nouns")
+		if strDescr.lower()=="4":
+			listIgnored()
+		if strDescr.lower()=="5":
+			listTable("ignored")
+		if strDescr.lower()=="e":
+			return 0
+		if strDescr.lower()=="m":
+			Main()
+	if strSection=="OpenProject":
+		print("Open project")
+	return strDescr
+
+
+def Main():
+
+	os.system('clear')
+	print("Start up")
+	print("========== MENU ===========")
+	print("List current Projects:1")
+	print("List Verbs:2")
+	print("List Nouns:3")
+	print("List ignored words:4")
+	print("Add new project:5")
+
+	strSel=selection("Main")
+
+
+class TestApp(npyscreen.NPSApp):
+
+	def main(self):
+		
+		# These lines create the form and populate it with widgets.
+		# A fairly complex screen in only 8 or so lines of code - a line for each control.
+		F  = npyscreen.Form(name = "Welcome to InnoVator",)
+		#t  = F.add(npyscreen.TitleText, name = "Text:",)
+		#t  = F.add(npyscreen.Textfield, name = "Project",value="Please enter your project here:")
+		#fn = F.add(npyscreen.TitleFilename, name = "Filename:")
+		#fn2 = F.add(npyscreen.TitleFilenameCombo, name="Filename2:")
+		#dt = F.add(npyscreen.TitleDateCombo, name = "Date:")
+		#s  = F.add(npyscreen.TitleSlider, out_of=12, name = "Slider")
+		#ml = F.add(npyscreen.MultiLineEdit,
+		#       value = """try typing here!\nMutiline text, press ^R to reformat.\n""",
+		#       max_height=5, rely=9)
+		ms = F.add(npyscreen.TitleSelectOne, max_height=4, value = [1,], name="Select Function",
+		        values = ["List all Projects","Verbs","Nouns","Ignored words","Add new project"], scroll_exit=True)
+		#ms2= F.add(npyscreen.TitleMultiSelect, max_height =-2, value = [1,], name="Pick Several",
+		#       values = ["Option1","Option2","Option3"], scroll_exit=True)
+		addStdFunctions(this)
+
+		# This lets the user interact with the Form.
+		F.edit()
+
+		print(ms.get_selected_objects())
+
+if __name__ == "__main__":
+	App = TestApp()
+	App.run()
+#storeW("test")
+#end
+
+
+

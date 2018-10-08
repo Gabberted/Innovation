@@ -1,0 +1,77 @@
+#!/usr/bin/python
+
+# This program will query the user for the project description
+# Filter the vowes, store them online db and exits (for now)
+import argparse
+import sys
+import os
+
+from argp import *
+from debugFnct import *
+from dbConn import *
+
+# For now we don't have any 
+# cli input at init
+parser=createParser()
+parseAction(parser)
+
+
+def storeW(strWord):
+	if boWordKnown:
+		print("Word already in db")
+	else:
+		strQ="insert into Nouns(word)values(" + strWord + ")"
+		ExecuteQuery(strQ)
+		print(strWord + " stored.")
+
+
+
+def storeNoun(strWord):
+	print("Storing: " + strWord)
+	strHost="mysql8.mijnhostingpartner.nl"
+	strUser="Autar3Joomla"
+	strPwd="ijQ84mTO"
+	strDb="autar3newj"
+
+	print("Connect to local db:")
+	store(strWord)
+	#testConn(strHost,strUser,strPwd,strDb)
+
+
+def newproject():
+	# we start with asking the user for the description
+	strDescr=input("Please give a complete description of the project:\n_>")
+	debugprint("Input: " + strDescr)
+
+	#we store the project for later usage
+	strQ="insert into projects(project)values('" + strDescr + "')"
+	ExecuteQuery(strQ)
+
+	# we chop all the words in description in split
+	for word in strDescr.split(" "):
+		# loop through them
+		print("Evaluating: " + word)
+		strNoun=input("Is '" + word +  "' a noun? (y/N)\n_>")
+
+		# if the word is noun 
+		if strNoun.lower() == "y":
+		#	store db
+			debugprint("Storing Noun")
+			storeW(word.lower())
+	# continue loop
+
+
+def Main():
+
+	os.system('clear')
+	print("Start up")
+	print("==============================================================="
+	print("==============================================================="	print("==============================================================="	print("==============================================================="	print("==============================================================="
+
+
+
+
+
+Main()
+#storeW("test")
+#end
